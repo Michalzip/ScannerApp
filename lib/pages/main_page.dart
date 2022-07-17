@@ -28,7 +28,8 @@ class MainPage extends StatelessWidget {
                             itemCount: state.listItems.length,
                             itemBuilder: (context, index) {
                               return ListTile(
-                                title: Text(state.listItems[index]["id"]),
+                                title:
+                                    Text(state.listItems[index]["scannedCode"]),
                                 subtitle: Text(state.listItems[index]["date"]),
                                 trailing: IconButton(
                                   iconSize: 20,
