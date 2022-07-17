@@ -9,23 +9,23 @@ part 'bloc_state.dart';
 class BlocBloc extends Bloc<BlocEvent, BlocState> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  List<dynamic> listOfData = [];
-  final Map<String, dynamic> item = Map<String, String>();
+  List<dynamic> listOfitem = [];
+  List<dynamic> itemToRemove = [];
 
   BlocBloc() : super(BlocInitial()) {
     on<GetDataEvent>(((event, emit) async {
       await getData();
-      emit(DataLoaded(listItems: listOfData));
+      emit(DataLoaded(listItems: listOfitem));
     }));
     on<AddDataEvent>((event, emit) async {
       await addData(event.codeBarToAdd, event.dataToAdd);
 
-      emit(DataLoaded(listItems: listOfData));
+      emit(DataLoaded(listItems: listOfitem));
     });
     on<RemoveDataEvent>((event, emit) async {
       await removeData(event.codeBarstoDelete);
       emit(DataLoaded(
-        listItems: listOfData,
+        listItems: listOfitem,
       ));
     });
   }
@@ -37,7 +37,7 @@ class BlocBloc extends Bloc<BlocEvent, BlocState> {
 
     try {
       codeData.forEach((element) {
-        return listOfData.add(jsonDecode(element));
+        return listOfitem.add(jsonDecode(element));
       });
     } catch (e) {
       print(e);
@@ -46,6 +46,7 @@ class BlocBloc extends Bloc<BlocEvent, BlocState> {
 
   Future<void> addData(String dataToAdd, String dateToAdd) async {
     final SharedPreferences prefs = await _prefs;
+    final Map<String, dynamic> item = {};
 
     var codeData = prefs.getStringList("list") ?? [];
     item['id'] = const Uuid().v4();
@@ -53,16 +54,17 @@ class BlocBloc extends Bloc<BlocEvent, BlocState> {
     item['date'] = dateToAdd;
     codeData.add(jsonEncode(item));
 
-    listOfData.add(item);
+    listOfitem.add(item);
+    itemToRemove.add(item);
 
     prefs.setStringList("list", codeData);
   }
 
   Future<void> removeData(String id) async {
     final SharedPreferences prefs = await _prefs;
-
-    listOfData.remove(item);
-
+    itemToRemove.forEach((element) {
+      listOfitem.removeWhere((element) => element['id'] == id);
+    });
     var codeData = prefs.getStringList("list") ?? [];
 
     codeData.removeWhere((element) => element.contains(id));
