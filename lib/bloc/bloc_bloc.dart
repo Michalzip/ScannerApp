@@ -10,7 +10,6 @@ class BlocBloc extends Bloc<BlocEvent, BlocState> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   List<dynamic> listOfitem = [];
-  List<dynamic> itemToRemove = [];
 
   BlocBloc() : super(BlocInitial()) {
     on<GetDataEvent>(((event, emit) async {
@@ -53,19 +52,18 @@ class BlocBloc extends Bloc<BlocEvent, BlocState> {
     item['scannedCode'] = dataToAdd;
     item['date'] = dateToAdd;
     codeData.add(jsonEncode(item));
-
     listOfitem.add(item);
-    itemToRemove.add(item);
 
     prefs.setStringList("list", codeData);
   }
 
   Future<void> removeData(String id) async {
     final SharedPreferences prefs = await _prefs;
-    itemToRemove.forEach((element) {
+    var codeData = prefs.getStringList("list") ?? [];
+
+    codeData.forEach((element) {
       listOfitem.removeWhere((element) => element['id'] == id);
     });
-    var codeData = prefs.getStringList("list") ?? [];
 
     codeData.removeWhere((element) => element.contains(id));
 

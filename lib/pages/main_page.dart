@@ -4,7 +4,7 @@ import 'package:flutter_app/bloc/bloc_bloc.dart';
 import 'package:flutter_app/pages/scanner_page.dart';
 
 class MainPage extends StatelessWidget {
-  MainPage({Key? key}) : super(key: key);
+  const MainPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +49,7 @@ class MainPage extends StatelessWidget {
                               );
                             },
                           )
-                        : Center(
+                        : const Center(
                             child: Text('EMPTY LIST'),
                           )),
               ));
