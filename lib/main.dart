@@ -5,7 +5,7 @@ import 'package:flutter_app/observer_bloc/basic_observer.dart';
 
 void main() {
   BlocOverrides.runZoned(
-    () => runApp(App()),
+    () => runApp(const App()),
     blocObserver: Observer(),
   );
 }

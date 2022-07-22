@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:uuid/uuid.dart';
+import 'package:flutter_app/model/code_bar_model.dart';
 import 'package:bloc/bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
@@ -7,66 +7,63 @@ part 'bloc_event.dart';
 part 'bloc_state.dart';
 
 class BlocBloc extends Bloc<BlocEvent, BlocState> {
-  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  List<CodeBarModel> codeBars = [];
 
-  List<dynamic> listOfitem = [];
+  late SharedPreferences sharedPreferences;
 
   BlocBloc() : super(BlocInitial()) {
     on<GetDataEvent>(((event, emit) async {
       await getData();
-      emit(DataLoaded(listItems: listOfitem));
+      emit(DataLoaded(codeBarsToLoad: codeBars));
     }));
     on<AddDataEvent>((event, emit) async {
-      await addData(event.codeBarToAdd, event.dataToAdd);
+      await saveData(event.id, event.codeBarToAdd, event.dataToAdd);
 
-      emit(DataLoaded(listItems: listOfitem));
+      emit(DataLoaded(codeBarsToLoad: codeBars));
     });
     on<RemoveDataEvent>((event, emit) async {
-      await removeData(event.codeBarstoDelete);
+      await removeData(event.codeBarToDelete);
       emit(DataLoaded(
-        listItems: listOfitem,
+        codeBarsToLoad: codeBars,
       ));
     });
   }
 
   Future<void> getData() async {
-    final SharedPreferences prefs = await _prefs;
+    final sharedPreferences = await SharedPreferences.getInstance();
 
-    var codeData = prefs.getStringList("list") ?? [];
+    List<String> mySavedList =
+        sharedPreferences.getStringList("myListString") ?? [];
 
-    try {
-      codeData.forEach((element) {
-        return listOfitem.add(jsonDecode(element));
-      });
-    } catch (e) {
-      print(e);
-    }
+    mySavedList.forEach((element) {
+      Map<String, dynamic> stringJson = jsonDecode(element);
+      CodeBarModel user = CodeBarModel.fromJson(stringJson);
+      codeBars.add(user);
+    });
   }
 
-  Future<void> addData(String dataToAdd, String dateToAdd) async {
-    final SharedPreferences prefs = await _prefs;
-    final Map<String, dynamic> item = {};
+  Future<void> saveData(
+      String id, String scannedCode, String scannedDate) async {
+    final sharedPreferences = await SharedPreferences.getInstance();
 
-    var codeData = prefs.getStringList("list") ?? [];
-    item['id'] = const Uuid().v4();
-    item['scannedCode'] = dataToAdd;
-    item['date'] = dateToAdd;
-    codeData.add(jsonEncode(item));
-    listOfitem.add(item);
+    CodeBarModel codeBar =
+        CodeBarModel(id: id, scannedCode: scannedCode, date: scannedDate);
+    List<String> codeBarToSave = [];
 
-    prefs.setStringList("list", codeData);
+    codeBars.add(codeBar);
+    codeBarToSave.add(jsonEncode(codeBar));
+
+    List<String> savedListOfCodeBars =
+        (sharedPreferences.getStringList('myListString') ?? []) + codeBarToSave;
+    sharedPreferences.setStringList("myListString", savedListOfCodeBars);
   }
 
   Future<void> removeData(String id) async {
-    final SharedPreferences prefs = await _prefs;
-    var codeData = prefs.getStringList("list") ?? [];
-
-    codeData.forEach((element) {
-      listOfitem.removeWhere((element) => element['id'] == id);
-    });
-
-    codeData.removeWhere((element) => element.contains(id));
-
-    prefs.setStringList("list", codeData);
+    final sharedPreferences = await SharedPreferences.getInstance();
+    List<String> mySavedList =
+        sharedPreferences.getStringList("myListString") ?? [];
+    mySavedList.removeWhere((codeBarToDelete) => codeBarToDelete.contains(id));
+    codeBars.removeWhere((codeBarToDelete) => codeBarToDelete.id == id);
+    sharedPreferences.setStringList('myListString', mySavedList);
   }
 }

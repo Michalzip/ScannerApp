@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_app/cubit/camera_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_qr_bar_scanner/qr_bar_scanner_camera.dart';
+import 'package:uuid/uuid.dart';
 
 class ScannerPage extends StatelessWidget {
   const ScannerPage({Key? key}) : super(key: key);
@@ -69,7 +70,9 @@ class ScannerPage extends StatelessWidget {
                               Navigator.pop(context);
 
                               context.read<BlocBloc>().add(AddDataEvent(
-                                  codeBarToAdd: codeBar ?? "Invalid Scanned",
+                                  id: const Uuid().v4(),
+                                  codeBarToAdd:
+                                      codeBar ?? 'INVALID SCANNED CODE',
                                   dataToAdd: date));
 
                               context

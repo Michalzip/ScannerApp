@@ -5,7 +5,7 @@ abstract class BlocState {}
 class BlocInitial extends BlocState {}
 
 class DataLoaded extends BlocState {
-  DataLoaded({required this.listItems});
+  DataLoaded({required this.codeBarsToLoad});
 
-  List<dynamic> listItems = [];
+  List<CodeBarModel> codeBarsToLoad;
 }

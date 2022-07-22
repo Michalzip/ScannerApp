@@ -18,7 +18,7 @@ class App extends StatelessWidget {
             create: (BuildContext context) => CameraCubit(),
           ),
         ],
-        child: MaterialApp(
+        child: const MaterialApp(
           debugShowCheckedModeBanner: false,
           home: MainPage(),
         ));
